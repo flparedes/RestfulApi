@@ -95,4 +95,23 @@ public class UserService {
 
 		return salida;
 	}
+
+	/**
+	 * Elimina el usuario con el id dado.
+	 * 
+	 * @param id
+	 *            identificador del usuario.
+	 */
+	public void deleteUser(String id) {
+		User usuario = null;
+		for (User user : users) {
+			if (user.getId().equals(id)) {
+				usuario = user;
+			}
+		}
+		
+		if (usuario != null) {
+			users.remove(usuario);
+		}
+	}
 }

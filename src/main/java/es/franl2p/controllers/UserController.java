@@ -3,6 +3,8 @@ package es.franl2p.controllers;
 import static spark.Spark.after;
 import static spark.Spark.get;
 import static spark.Spark.post;
+import static spark.Spark.put;
+import static spark.Spark.delete;
 
 import com.google.gson.Gson;
 
@@ -15,6 +17,17 @@ public class UserController {
 		// Método para tratar los gets de /users
 		get("/users", (request, response) -> userService.getAllUsers(), new JsonTransformer());
 
+		// Método para tratar los gets de /users/:id (Datos del usuario dado)
+		get("/users/:idUser", (req, res) -> {
+			String idUser = req.params(":idUser");
+			User user = userService.getUser(idUser);
+			if (user != null) {
+				return user;
+			}
+
+			res.status(400);
+			return "No user with id '" + idUser + "' found";
+		}, new JsonTransformer());
 
 		// Método para tratar los posts de /users (Creación de usuarios)
 		post("/users", (req, res) -> {
@@ -26,16 +39,43 @@ public class UserController {
 			// Convertimos de JSON a objeto de la clase User
 			es.franl2p.model.User user = new Gson().fromJson(body, User.class);
 			if (user != null) {
-				System.out.println("---- Usuario cargado correctamente.");
 				name = user.getName();
 				email = user.getEmail();
 			}
-		
-			System.out.println("---- Datos del usuario.");
-			System.out.println("---- name: " + name);
-			System.out.println("---- email: " + email);
 			
 			return userService.createUser(name, email);
+		}, new JsonTransformer());
+
+		// Método para tratar los put de /users/:idUser (Modificación de datos de usuarios)
+		put("/users/:idUser", (req, res) -> {
+			String idUser = req.params(":idUser");
+			
+			// Se cargan los parámetros de la query (URL)
+			String name = req.queryParams("name");
+			String email = req.queryParams("email");
+
+			User user = userService.getUser(idUser);
+			if (user != null) {				
+				return userService.updateUser(idUser, name, email);
+			}
+
+			res.status(400);
+			return "No user with id '" + idUser + "' found";
+		}, new JsonTransformer());
+
+		// Método para tratar los delete de /users/:idUser (Eliminar usuario)
+		delete("/users/:idUser", (req, res) -> {
+			String idUser = req.params(":idUser");
+
+			User user = userService.getUser(idUser);
+			if (user != null) {
+				userService.deleteUser(idUser);
+				res.status(200);
+				return "User with id '" + idUser + "' deleted";
+			}
+
+			res.status(400);
+			return "No user with id '" + idUser + "' found";
 		}, new JsonTransformer());
 
 		// Filtro para convertir la salida a formato JSON
