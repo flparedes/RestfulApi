@@ -37,7 +37,7 @@ public class UserController {
 			String body = req.body();
 			
 			// Convertimos de JSON a objeto de la clase User
-			es.franl2p.model.User user = new Gson().fromJson(body, User.class);
+			User user = json2User(body);
 			if (user != null) {
 				name = user.getName();
 				email = user.getEmail();
@@ -53,6 +53,12 @@ public class UserController {
 			// Se cargan los parámetros de la query (URL)
 			String name = req.queryParams("name");
 			String email = req.queryParams("email");
+			
+			User userData = json2User(req.body());
+			if (userData != null) {
+				name = userData.getName();
+				email = userData.getEmail();
+			}
 
 			User user = userService.getUser(idUser);
 			if (user != null) {				
@@ -82,5 +88,21 @@ public class UserController {
 		after((request, response) -> {
 			response.type("application/json");
 		});
+	}
+	
+
+	/**
+	 * Convierte el objeto JSON dado en un objeto de tipo User.
+	 * @param body body de la request con losa datos del usuario.
+	 * @return Objeto de tipo User.
+	 */
+	private static User json2User(String body) {
+		User user = null;
+		try {
+			user = new Gson().fromJson(body, User.class);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return user;
 	}
 }
